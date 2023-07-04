@@ -1,0 +1,48 @@
+<?php
+/*
+Template Name: Custom Template
+*/
+
+get_header();
+?>
+
+<!-- 이미지 업로드 폼 -->
+<form action="" method="post" enctype="multipart/form-data">
+    <input type="file" name="image_upload" />
+    <input type="submit" value="이미지 업로드" />
+</form>
+
+<!-- 이미지 개선 처리 -->
+<?php
+if (isset($_FILES['image_upload'])) {
+    $image_file = $_FILES['image_upload']['tmp_name'];
+
+    // 이미지 개선 로직 구현
+    if (file_exists($image_file)) {
+        $improved_image = improve_image($image_file); // 이미지 개선 함수 호출
+        $improved_image_path = get_stylesheet_directory() . '/improved-image.jpg';
+        imagejpeg($improved_image, $improved_image_path);
+        imagedestroy($improved_image);
+    }
+
+    // 다운로드 버튼 생성
+    if (isset($improved_image_path) && file_exists($improved_image_path)) {
+        echo '<a href="' . get_stylesheet_directory_uri() . '/improved-image.jpg" download>이미지 다운로드</a>';
+    }
+
+    // 캐시 삭제
+    if (file_exists($image_file)) {
+        unlink($image_file);
+    }
+}
+
+function improve_image($image_file) {
+    // ImageMagick를 사용하여 이미지 개선
+    $im = new Imagick($image_file);
+    $im->enhanceImage(); // 이미지 개선 적용
+    return $im;
+}
+?>
+
+<?php get_footer(); ?>
+
